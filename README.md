@@ -15,13 +15,13 @@ Will we then get the new updated patched `myorg:jdk8` or will we get the origina
 Base image which contains simple node hello world program.
 Runs on port 3000
 Runs app.base.js
-Returns Hello World!
+Returns BASE
 TAGGED jim:base
 
 ## Dockerfile.base.bugfix
 Inherits from base
-Runs app.first.js
-Returns Hello World! FIXED!
+Runs app.base.bugfix.js
+Returns BASE PATCHED
 TAGGED jim:base
 
 ## Dockerfile.first

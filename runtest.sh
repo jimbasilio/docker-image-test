@@ -2,7 +2,7 @@
 
 function waitforenter() {
     echo
-    echo "Press any key to continue"
+    echo "Press ENTER key to continue"
     read
 }
 
@@ -19,43 +19,82 @@ echo "Building base image and run on port 2999"
 docker build -t jim:base -f Dockerfile.base .
 docker run -d -p 2999:3000 --name jim-base jim:base
 
-echo "Curl base image 2999"
+echo "Curl base image 2999, should return BASE"
 sleep 1
 curl localhost:2999
 
 waitforenter
 
-echo "Building first image which uses base as foundation and run on port 3000"
-docker build -t jim:first -f Dockerfile.first .
-docker run -d -p 3000:3000 --name jim-first jim:first
+echo "Building middle image which uses base as foundation and run on port 3000"
+docker build -t jim:middle -f Dockerfile.middle .
+docker run -d -p 3000:3000 --name jim-middle jim:middle
 
-echo "Curl base image 3000"
+echo "Curl middle image 3000, should return BASE"
 sleep 1
 curl localhost:3000
 
 waitforenter
 
-echo "Build new base image with 'bugfix' (new app.js in CMD)"
+echo "Building last image which uses middle as foundation and run on port 3001"
+docker build -t jim:last -f Dockerfile.last .
+docker run -d -p 3001:3000 --name jim-last jim:last
+
+echo "Curl base image 3001, should return BASE"
+sleep 1
+curl localhost:3001
+
+waitforenter
+
+echo "Stopping jim-base containers"
 docker stop jim-base
 docker rm jim-base
+echo "Build new base image with 'bugfix' (new app.bugfix.base.js in CMD, changes return string)"
 docker build -t jim:base -f Dockerfile.base.bugfix .
 docker run -d -p 2999:3000 --name jim-base jim:base
 
-echo "Curl base image 2999, should show new message"
+echo "Curl base image 2999, should show BASE PATCHED"
 sleep 1
 curl localhost:2999
 
 waitforenter
 
-echo "Build new first image which uses base as foundation and run on port 3000"
-docker stop jim-first
-docker rm jim-first
-docker build -t jim:first -f Dockerfile.first.bugfix .
-docker run -d -p 3000:3000 --name jim-first jim:first
+echo "Stopping jim-last containers"
+docker stop jim-last
+docker rm jim-last
+echo "Build new last image which uses middle as foundation and run on port 3001"
+docker build -t jim:last -f Dockerfile.last .
+docker run -d -p 3001:3000 --name jim-last jim:last
 
-echo "Curl base image 3000, should show new message from new base image even though tag has not changed in FROM for Dockerfile"
+echo "Curl last image 3001, BASE means it took the original image (not what that base tag is pointing to). BASE PATCHED means it took most recent tag"
+sleep 1
+curl localhost:3001
+
+waitforenter
+
+echo "Stopping jim-middle containers"
+docker stop jim-middle
+docker rm jim-middle
+
+echo "Building middle image which uses base as foundation and run on port 3000"
+docker build -t jim:middle -f Dockerfile.middle .
+docker run -d -p 3000:3000 --name jim-middle jim:middle
+
+echo "Curl middle image 3000, should return BASE PATCHED"
 sleep 1
 curl localhost:3000
+
+waitforenter
+
+echo "Stopping jim-last containers"
+docker stop jim-last
+docker rm jim-last
+echo "Build new last image which uses middle as foundation and run on port 3001"
+docker build -t jim:last -f Dockerfile.last .
+docker run -d -p 3001:3000 --name jim-last jim:last
+
+echo "Curl last image 3001, BASE means it took the original image (not what that base tag is pointing to). BASE PATCHED means it took most recent tag"
+sleep 1
+curl localhost:3001
 
 waitforenter
 

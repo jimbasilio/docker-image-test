@@ -1,3 +1,0 @@
-FROM jim:base
-WORKDIR /usr/src/app
-#no CMD so we'll run the new base image CMD
