@@ -1,0 +1,3 @@
+FROM jim:base
+
+RUN npm config set strict-ssl false && npm install
